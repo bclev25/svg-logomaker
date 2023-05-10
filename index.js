@@ -1,4 +1,4 @@
-const svgwrite = require('svgwrite');
+const svgWrite = require('svgWrite');
 const readline = require('readline');
 const fs = require('fs');
 
@@ -16,7 +16,7 @@ rl.question('Enter up tp three characters: ', (text) => {
 
           rl.question('Enter ${shape} color: ', (shapeColor) => {
 
-            const svg = svgwrite('<?xml version="1.0" encoding="utf-8"?>\n');
+            const svg = svgWrite('<?xml version="1.0" encoding="utf-8"?>\n');
             const shapeSize = { width: 100, height: 100};
             const textSize = 36;
 
