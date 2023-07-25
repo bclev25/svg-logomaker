@@ -1,65 +1,106 @@
-import {SVG} from '@svgdotjs/svgjs';
-import { createInterface } from 'readline';
-import { writeFileSync } from 'fs';
+const inquirer = require("inquirer");
+const fs = require("fs");
 
-const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
 
-rl.question('Enter up tp three characters: ', (text) => {
-    text = text.slice(0, 3);
+function promptUser() {
+    return inquirer.prompt([
+        {
+            type: "input",
+            name: "text",
+            message: "Enter up to three characters for the logo:",
+            validate: (input) => {
+                if (input.length <= 3) {
+                    return true;
+                }
+                return "Please enter up to three characters!";
+            },
+        },
+        {
+            type: "input",
+            name: "textColor",
+            message: "Choose a shape for the logo:",
+            choices: ["circle", "triangle", "square"],
+        },
+        {
+            type: "input",
+            name: "shapeColor",
+            message: "Enter the shape color:",
+        },
+    ]);
+}
 
-    rl.question('Enter text color: ', (textColor) => {
+function generateSVG(data) {
+    const {text, textColor, shape, shapeColor} = data;
 
-        rl.question('Choose a shape (circle, triangle, square): ', (shape) => {
+    const svg = new SVG({
+        width: 300,
+        height:200,
+    });
 
-          rl.question('Enter ${shape} color: ', (shapeColor) => {
+    svg.rect (0, 0, 300, 200).fill("white");
 
-            const svg = svgWrite('<?xml version="1.0" encoding="utf-8"?>\n');
-            const shapeSize = { width: 100, height: 100};
-            const textSize = 36;
-
-            switch (shape) {
-                case 'circle':
-                svg.circle({ cx: '150', cy: '100', r:'50', fill: shapeColor});
-                break;
-                case 'triangle':
-                    svg.polygon([
-                        '${150 - shapeSize.width / 2},${100 + shape.height / 2}',
-                        '${150 - shapeSize.width / 2},${100 + shape.height / 2}',
-                        '${150 - shapeSize.width / 2},${100 + shape.height / 2}'
-                    ], { fill: shapeColor});
+    switch (shape) {
+        case "circle":
+            svg.circle(150, 100, 50).fill(shapeColor);
             break;
-        case 'square':
-            svg.rect(
-                '${150 - shapeSize.width / 2}${100 + shapeSize.height / 2}',
-                   shapeSize.width, 
-                   shapeSize.height, 
-                   { fill: shapeColor}
-            );
+        case "triangle":
+            svg.polygon("100,180 200, 180 150, 20").fill(shapeColor);
+            break;
+        case "square":
+            svg.rect(100, 50, 100, 100).fill(shapeColor);
             break;
             default:
-                console.log('Invalid shape entered');
-                rl.close();
-                return;
+            break;
+    }
 
-                svg.text(text, { x: '150', y:'100', fill: textColor, 'font-size': textSize, 'text-anchor': 'middle'});
+    svg.text(150, 100, text).fill(textColor).attr("text-anchor", "middle");
 
-                const filename = 'logo.svg';
-                writeFileSync(filename, svg.toString());
-                console.log('Generated ${filename}');
+    return svg.toString();
+}
 
-                const browserPath = process.env.Browser || '/usr/bin/xdg-open';
-                const url = 'file://${__dirname}/${filename}';
-                const childProcess = require('child_process').exec;
-                childProcess('${browserPath} "${url}"');
-
-                rl.close();
-            }
-
-          });
-
-        });
+function saveSVGToFile(svgCode) {
+    fs.writeFile("logo.svg", svgCode, (err) => {
+        if (err) throw err;
+        console.log("generated logo.svg");
     });
-});
+}
+
+class SVG {
+    constructor(options) {}
+    rect(x,y, width, height) {}
+    circle(cx, cy, r) {}
+    polygon(points) {}
+    text(x, y, text) {}
+    toString() {}
+}
+
+class Rect {
+    fill(color) {}
+    attr(name, value) {}
+}
+
+class Circle {
+    fill(color) {}
+    attr(name, value) {}
+}
+
+class Polygon {
+    fill(color) {}
+    attr(name, value) {}
+}
+
+class Text {
+    fill(color) {}
+    attr(name, value) {}
+}
+
+function main () {
+    console.log("welcome to the logo generator!!");
+
+    promptUser()
+    .then((answers) => generateSVG(answers))
+    .then((svgCode) => saveSVGToFile(svgCode))
+    .catch ((err) => console.error(err));
+}
+
+main();
